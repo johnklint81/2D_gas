@@ -4,14 +4,14 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 N = 100
-sigma = 1
-epsilon = 1
-mass = 1
+sigma = 3.4 * 10 ** 10
+epsilon = 120
+mass = 6.7 * 10 ** -23
 L = 100 * sigma
 number_of_timesteps = 10000
 v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
-timestep = t0 * 0.0001
+timestep = t0 * 0.001
 t_plot = np.linspace(0, number_of_timesteps * timestep, number_of_timesteps - 1)
 
 position_list = np.zeros([N, 2])
@@ -45,24 +45,6 @@ def initialize_particles(_position_list, _velocity_list, _sigma, _v0, _L, _N):
 def get_distances(_position_candidate, _position_list):
     _distances = np.linalg.norm(_position_candidate - _position_list, axis=1)
     return _distances
-
-
-# def get_forces2(_position_list, _sigma, _epsilon, _N):
-#     _forces = np.zeros([N, 2])
-#     for i in range(_N):
-#         _distances = get_distances(_position_list[i], _position_list)
-#         _directions = _position_list - _position_list[i]
-#         index = np.where(_distances == 0)[0][0]
-#         _directions = np.delete(_directions, index, axis=0)
-#         _distances = np.delete(_distances, _distances == 0)
-#         _directions[:, 0] /= _distances
-#         _directions[:, 1] /= _distances
-#
-#         _direction = np.sum(_directions, axis=0) / (_N - 1)
-#         _magnitude = np.sum(4 * epsilon * (12 * (sigma ** 12 / _distances ** 13)
-#                                            - 6 * (sigma ** 6 / _distances ** 7)), axis=0)
-#         _forces[i, :] = _direction * _magnitude
-#     return _forces
 
 
 def get_forces(_position_list, _sigma, _epsilon, _N):
@@ -104,11 +86,6 @@ def get_energy(_distances, _velocity, _epsilon, _sigma, _mass):
     _potential_energy = 0.5 * np.sum(4 * _epsilon * ((_sigma / _distances) ** 12 - (_sigma / _distances) ** 6))
     _kinetic_energy = 0.5 * _mass * np.linalg.norm(_velocity) ** 2
     _total_energy = _potential_energy + _kinetic_energy
-    # print("----")
-    # print(_potential_energy,)
-    # print(_kinetic_energy)
-    # print(_total_energy)
-    # print(_potential_energy + _kinetic_energy != _total_energy)
     return _potential_energy, _kinetic_energy, _total_energy
 
 
