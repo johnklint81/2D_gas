@@ -1,2 +1,3 @@
 # 2D_gas
-2D gas in a box
+2D gas in a box using a Lennard-Jones potential. 
+In progress - Not working!
