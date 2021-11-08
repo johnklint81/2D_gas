@@ -12,16 +12,16 @@ number_of_timesteps = 10000
 v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
 timestep = t0 * 0.0001
-t_plot = np.linspace(0, number_of_timesteps * timestep, number_of_timesteps)
+t_plot = np.linspace(0, number_of_timesteps * timestep, number_of_timesteps - 1)
 
 position_list = np.zeros([N, 2])
 velocity_list = np.zeros([N, 2])
 potential_energy_list = np.zeros(N)
 kinetic_energy_list = np.zeros(N)
 total_energy_list = np.zeros(N)
-potential_energy_list_t = np.zeros(number_of_timesteps)
-kinetic_energy_list_t = np.zeros(number_of_timesteps)
-total_energy_list_t = np.zeros(number_of_timesteps)
+potential_energy_list_t = np.zeros(number_of_timesteps - 1)
+kinetic_energy_list_t = np.zeros(number_of_timesteps - 1)
+total_energy_list_t = np.zeros(number_of_timesteps - 1)
 
 
 def initialize_particles(_position_list, _velocity_list, _sigma, _v0, _L, _N):
@@ -104,12 +104,16 @@ def get_energy(_distances, _velocity, _epsilon, _sigma, _mass):
     _potential_energy = 0.5 * np.sum(4 * _epsilon * ((_sigma / _distances) ** 12 - (_sigma / _distances) ** 6))
     _kinetic_energy = 0.5 * _mass * np.linalg.norm(_velocity) ** 2
     _total_energy = _potential_energy + _kinetic_energy
+    # print("----")
+    # print(_potential_energy,)
+    # print(_kinetic_energy)
+    # print(_total_energy)
+    # print(_potential_energy + _kinetic_energy != _total_energy)
     return _potential_energy, _kinetic_energy, _total_energy
 
 
 def step(_position_list, _velocity_list, _potential_energy_list, _kinetic_energy_list, _total_energy_list, _sigma,
-         _epsilon,
-         _N, _L, _mass, _timestep):
+         _epsilon, _N, _L, _mass, _timestep):
     _position_list += _velocity_list * _timestep / 2
     _position_list, _velocity_list = outside_box(_position_list, _velocity_list, _L, _N)
 
