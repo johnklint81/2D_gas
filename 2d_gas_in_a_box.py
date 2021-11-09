@@ -13,6 +13,8 @@ v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
 timestep_factor = 0.001
 timestep = t0 * timestep_factor
+fps = 2000
+
 t_plot = np.linspace(0, number_of_timesteps * timestep, number_of_timesteps - 1)
 zero_plot = np.zeros(number_of_timesteps - 1)
 
@@ -148,13 +150,13 @@ for i in range(number_of_timesteps - 1):
 potential_energy_list_t -= potential_energy_list_t[0]
 kinetic_energy_list_t -= kinetic_energy_list_t[0]
 total_energy_list_t -= total_energy_list_t[0]
-max_E = np.max(np.abs(total_energy_list_t))
 max_K = np.max(np.abs(kinetic_energy_list_t))
 max_U = np.max(np.abs(potential_energy_list_t))
+max_E = max_K + max_U
 
 animation = FuncAnimation(fig, update, frames=number_of_timesteps, repeat=False, blit=True)
 
-writervideo = matplotlib.animation.FFMpegWriter(fps=2000)
+writervideo = matplotlib.animation.FFMpegWriter(fps=fps)
 animation.save('animated_gas.mp4', writer=writervideo)
 
 fig2, ax = plt.subplots(3, 1)
@@ -175,7 +177,8 @@ ax[1].plot(t_plot, zero_plot, 'k--')
 ax[1].plot(t_plot, potential_energy_list_t, 'b', alpha=0.7, label='Potential energy')
 ax[2].plot(t_plot, zero_plot, 'k--')
 ax[2].plot(t_plot, total_energy_list_t, 'g', alpha=0.7, label='Total energy')
+ax[0].legend(loc='lower right')
+ax[1].legend(loc='lower right')
+ax[2].legend(loc='lower right')
 plt.tight_layout()
-plt.legend(loc='lower right')
-
 plt.show()
