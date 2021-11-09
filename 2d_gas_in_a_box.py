@@ -8,11 +8,13 @@ sigma = 1
 epsilon = 1
 mass = 1
 L = 100 * sigma
-number_of_timesteps = 10000
+number_of_timesteps = 20000
 v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
-timestep = t0 * 0.001
+timestep_factor = 0.001
+timestep = t0 * timestep_factor
 t_plot = np.linspace(0, number_of_timesteps * timestep, number_of_timesteps - 1)
+zero_plot = np.zeros(number_of_timesteps - 1)
 
 position_list = np.zeros([N, 2])
 velocity_list = np.zeros([N, 2])
@@ -142,6 +144,14 @@ for i in range(number_of_timesteps - 1):
     total_energy_list_t[i] = step(position_array[:, :, i], velocity_array[:, :, i], potential_energy_list,
                                   kinetic_energy_list, total_energy_list, sigma, epsilon, N, L, mass, timestep)
 
+
+potential_energy_list_t -= potential_energy_list_t[0]
+kinetic_energy_list_t -= kinetic_energy_list_t[0]
+total_energy_list_t -= total_energy_list_t[0]
+max_E = np.max(np.abs(total_energy_list_t))
+max_K = np.max(np.abs(kinetic_energy_list_t))
+max_U = np.max(np.abs(potential_energy_list_t))
+
 animation = FuncAnimation(fig, update, frames=number_of_timesteps, repeat=False, blit=True)
 
 writervideo = matplotlib.animation.FFMpegWriter(fps=2000)
@@ -149,14 +159,23 @@ animation.save('animated_gas.mp4', writer=writervideo)
 
 fig2, ax = plt.subplots(3, 1)
 
-ax[2].set_xlabel("t [t$_0$]")
-ax[0].set_ylabel("K")
-ax[1].set_ylabel("U")
+ax[2].set_xlabel("$t~[t_0]$")
+ax[0].set_ylabel("$\Delta K~[\\varepsilon]$")
+ax[1].set_ylabel("$\Delta U~[\\varepsilon]$")
+ax[2].set_ylabel("$\Delta E~[\\varepsilon]$")
+ax[0].set_title(f'2D Lennard-Jones gas, $\Delta t = {timestep_factor}t_0$.')
 ax[0].set_xticks([])
 ax[1].set_xticks([])
-ax[2].set_ylabel("E")
-ax[0].plot(t_plot, kinetic_energy_list_t, 'r', alpha=0.7)
-ax[1].plot(t_plot, potential_energy_list_t, 'b', alpha=0.7)
-ax[2].plot(t_plot, total_energy_list_t, 'k--', alpha=0.7)
+ax[0].set_ylim([-max_K, max_K])
+ax[1].set_ylim([-max_U, max_U])
+ax[2].set_ylim([-max_E, max_E])
+ax[0].plot(t_plot, zero_plot, 'k--')
+ax[0].plot(t_plot, kinetic_energy_list_t, 'r', alpha=0.7, label='Kinetic energy')
+ax[1].plot(t_plot, zero_plot, 'k--')
+ax[1].plot(t_plot, potential_energy_list_t, 'b', alpha=0.7, label='Potential energy')
+ax[2].plot(t_plot, zero_plot, 'k--')
+ax[2].plot(t_plot, total_energy_list_t, 'g', alpha=0.7, label='Total energy')
+plt.tight_layout()
+plt.legend(loc='lower right')
 
 plt.show()
