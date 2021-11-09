@@ -8,12 +8,12 @@ sigma = 1
 epsilon = 1
 mass = 1
 L = 100 * sigma
-number_of_timesteps = 20000
+number_of_timesteps = 2000
 v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
-timestep_factor = 0.001
+timestep_factor = 0.01
 timestep = t0 * timestep_factor
-fps = 2000
+fps = 1000
 
 t_plot = np.linspace(0, number_of_timesteps * timestep, number_of_timesteps - 1)
 zero_plot = np.zeros(number_of_timesteps - 1)
@@ -181,4 +181,20 @@ ax[0].legend(loc='lower right')
 ax[1].legend(loc='lower right')
 ax[2].legend(loc='lower right')
 plt.tight_layout()
+
+plt.figure()
+plt.xlabel("x")
+plt.ylabel("y")
+chosen_time_slice_start = 1000
+chosen_timeslice_end = 1080
+position_figure = position_array[:, :, chosen_time_slice_start:chosen_timeslice_end]
+end_position_figure = position_figure[:, :, - 1]
+velocity_figure = velocity_array[:, :, chosen_timeslice_end]
+
+for i in range(N):
+    plt.plot(position_figure[i, 0, :], position_figure[i, 1, :], 'b', zorder=1)
+    plt.scatter(end_position_figure[i, 0], end_position_figure[i, 1], s=40, c='r', edgecolors="k", zorder=2)
+    plt.arrow(end_position_figure[i, 0], end_position_figure[i, 1], velocity_figure[i, 0], velocity_figure[i, 1],
+              width=0.005, head_width=24*0.05, head_length=12*0.05, zorder=3)
+
 plt.show()
