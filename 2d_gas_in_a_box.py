@@ -4,11 +4,11 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 N = 100
-sigma = 3.4 * 10 ** 10
-epsilon = 120
-mass = 6.7 * 10 ** -23
+sigma = 1
+epsilon = 1
+mass = 1
 L = 100 * sigma
-number_of_timesteps = 10000
+number_of_timesteps = 100000
 v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
 timestep = t0 * 0.001
@@ -24,6 +24,7 @@ kinetic_energy_list_t = np.zeros(number_of_timesteps - 1)
 total_energy_list_t = np.zeros(number_of_timesteps - 1)
 
 
+# Initialize and check so no particle is too close
 def initialize_particles(_position_list, _velocity_list, _sigma, _v0, _L, _N):
     _position_list = np.expand_dims(np.random.rand(2) * _L, axis=0)
     _angle = np.random.rand(_N) * 2 * np.pi
@@ -42,28 +43,31 @@ def initialize_particles(_position_list, _velocity_list, _sigma, _v0, _L, _N):
     return _position_list, _velocity_list
 
 
+# Get distance between particles
 def get_distances(_position_candidate, _position_list):
     _distances = np.linalg.norm(_position_candidate - _position_list, axis=1)
     return _distances
 
 
+# Get forces for all particle and return the sum of all forces
 def get_forces(_position_list, _sigma, _epsilon, _N):
     _forces = np.zeros([N, 2])
     for i in range(_N):
         _distances = get_distances(_position_list[i], _position_list)
-        _directions = _position_list - _position_list[i]
-        index = np.where(_distances == 0)[0][0]
-        _directions = np.delete(_directions, index, axis=0)
-        _distances = np.delete(_distances, _distances == 0)
-        _directions[:, 0] /= _distances
-        _directions[:, 1] /= _distances
+        _directions = _position_list[i] - _position_list     # get direction vectors between all particles
+        _index = np.where(_distances == 0)[0][0]    # find the entry for the direction to the particle itself
+        _directions = np.delete(_directions, _index, axis=0)    # delete it
+        _distances = np.delete(_distances, _distances == 0)     # delete as well
+        _directions[:, 0] /= _distances     # normalize direction vectors to unity
+        _directions[:, 1] /= _distances     # same
         _magnitude = 4 * epsilon * (12 * (sigma ** 12 / _distances ** 13)
-                                    - 6 * (sigma ** 6 / _distances ** 7))
-        _forces[i, 0] = np.sum(_directions[:, 0] * _magnitude)
-        _forces[i, 1] = np.sum(_directions[:, 1] * _magnitude)
+                                    - 6 * (sigma ** 6 / _distances ** 7))   # calculate the magnitude of the forces
+        _forces[i, 0] = np.sum(_directions[:, 0] * _magnitude)      # combine direction vectors with magnitude
+        _forces[i, 1] = np.sum(_directions[:, 1] * _magnitude)      # same
     return _forces
 
 
+# Check if any particle is outside the box
 def outside_box(_position_list, _velocity_list, _L, _N):
     for i in range(_N):
         if _position_list[i, 0] > _L:
@@ -89,8 +93,10 @@ def get_energy(_distances, _velocity, _epsilon, _sigma, _mass):
     return _potential_energy, _kinetic_energy, _total_energy
 
 
+# Advance algorithm one step for all particles
 def step(_position_list, _velocity_list, _potential_energy_list, _kinetic_energy_list, _total_energy_list, _sigma,
          _epsilon, _N, _L, _mass, _timestep):
+    # Leapfrog algorithm
     _position_list += _velocity_list * _timestep / 2
     _position_list, _velocity_list = outside_box(_position_list, _velocity_list, _L, _N)
 
@@ -100,6 +106,7 @@ def step(_position_list, _velocity_list, _potential_energy_list, _kinetic_energy
     _position_list, _velocity_list = outside_box(_position_list, _velocity_list, _L, _N)
 
     for i in range(_N):
+        # Get energy at each timestep
         _distances = get_distances(_position_list[i], _position_list)
         _distances = np.delete(_distances, _distances == 0)
         _potential_energy_list[i], _kinetic_energy_list[i], _total_energy_list[i] = get_energy(_distances,
@@ -112,6 +119,7 @@ def step(_position_list, _velocity_list, _potential_energy_list, _kinetic_energy
     return _position_list, _velocity_list, _potential_energy, _kinetic_energy, _total_energy
 
 
+# For creating animation
 def update(i):
     data = position_array[:, :, i]
     position_plot.set_data(data[:, 0], data[:, 1])
@@ -128,14 +136,15 @@ position_array = np.zeros([N, 2, number_of_timesteps])
 velocity_array = np.zeros([N, 2, number_of_timesteps])
 position_array[:, :, 0], velocity_array[:, :, 0] = initialize_particles(position_list, velocity_list, sigma, v0, L, N)
 
+# Evolve in time
 for i in range(number_of_timesteps - 1):
     position_array[:, :, i + 1], velocity_array[:, :, i + 1], potential_energy_list_t[i], kinetic_energy_list_t[i], \
     total_energy_list_t[i] = step(position_array[:, :, i], velocity_array[:, :, i], potential_energy_list,
                                   kinetic_energy_list, total_energy_list, sigma, epsilon, N, L, mass, timestep)
 
-animation = FuncAnimation(fig, update, frames=number_of_timesteps, blit=True)
+animation = FuncAnimation(fig, update, frames=number_of_timesteps, repeat=False, blit=True)
 
-writervideo = matplotlib.animation.FFMpegWriter(fps=500)
+writervideo = matplotlib.animation.FFMpegWriter(fps=1000)
 animation.save('animated_gas.mp4', writer=writervideo)
 
 fig2, ax = plt.subplots(3, 1)
