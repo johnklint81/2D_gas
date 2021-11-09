@@ -8,7 +8,7 @@ sigma = 1
 epsilon = 1
 mass = 1
 L = 100 * sigma
-number_of_timesteps = 100000
+number_of_timesteps = 10000
 v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
 timestep = t0 * 0.001
@@ -144,7 +144,7 @@ for i in range(number_of_timesteps - 1):
 
 animation = FuncAnimation(fig, update, frames=number_of_timesteps, repeat=False, blit=True)
 
-writervideo = matplotlib.animation.FFMpegWriter(fps=1000)
+writervideo = matplotlib.animation.FFMpegWriter(fps=2000)
 animation.save('animated_gas.mp4', writer=writervideo)
 
 fig2, ax = plt.subplots(3, 1)
