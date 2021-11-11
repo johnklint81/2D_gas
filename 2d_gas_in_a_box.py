@@ -10,8 +10,8 @@ mass = 1
 L = 100 * sigma
 v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
-number_of_timesteps = 3000
-timestep_factor = 0.01
+number_of_timesteps = int(200000 * t0)
+timestep_factor = 0.001
 timestep = t0 * timestep_factor
 fps = 1000
 
@@ -153,7 +153,7 @@ kinetic_energy_list_t -= kinetic_energy_list_t[0]
 total_energy_list_t -= total_energy_list_t[0]
 max_K = np.max(np.abs(kinetic_energy_list_t))
 max_U = np.max(np.abs(potential_energy_list_t))
-max_E = int(max_K / 2)
+max_E = int(max_K / 4)
 
 animation = FuncAnimation(fig, update, frames=number_of_timesteps, repeat=False, blit=True)
 
