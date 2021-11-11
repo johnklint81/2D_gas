@@ -3,14 +3,14 @@ import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-N = 100
+N = 36
 sigma = 1
 epsilon = 1
 mass = 1
 L = 100 * sigma
-number_of_timesteps = 2000
 v0 = np.sqrt(2 * epsilon / mass)
 t0 = sigma / v0
+number_of_timesteps = 3000
 timestep_factor = 0.01
 timestep = t0 * timestep_factor
 fps = 1000
@@ -28,20 +28,20 @@ kinetic_energy_list_t = np.zeros(number_of_timesteps - 1)
 total_energy_list_t = np.zeros(number_of_timesteps - 1)
 
 
-# Initialize and check so no particle is too close
+# Initialize and check that no particles are too close
 def initialize_particles(_position_list, _velocity_list, _sigma, _v0, _L, _N):
     _position_list = np.expand_dims(np.random.rand(2) * _L, axis=0)
     _angle = np.random.rand(_N) * 2 * np.pi
     _velocity_list[:, :] = 2 * _v0 * np.reshape((np.cos(_angle), np.sin(_angle)), (_N, 2))
 
     for i in range(_N - 1):
-        placing = True
-        while placing:
+        _placing = True
+        while _placing:
             _position_candidate = np.expand_dims(np.random.rand(2) * _L, axis=0)
             if np.all(get_distances(_position_candidate, _position_list) > sigma):
 
                 _position_list = np.append(_position_list, _position_candidate, axis=0)
-                placing = False
+                _placing = False
             else:
                 print("Too close! Placing a new particle!")
     return _position_list, _velocity_list
@@ -116,7 +116,8 @@ def step(_position_list, _velocity_list, _potential_energy_list, _kinetic_energy
         _potential_energy_list[i], _kinetic_energy_list[i], _total_energy_list[i] = get_energy(_distances,
                                                                                                _velocity_list[i],
                                                                                                _epsilon,
-                                                                                               _sigma, _mass)
+                                                                                               _sigma,
+                                                                                               _mass)
     _potential_energy = np.sum(_potential_energy_list)
     _kinetic_energy = np.sum(_kinetic_energy_list)
     _total_energy = _potential_energy + _kinetic_energy
@@ -152,7 +153,7 @@ kinetic_energy_list_t -= kinetic_energy_list_t[0]
 total_energy_list_t -= total_energy_list_t[0]
 max_K = np.max(np.abs(kinetic_energy_list_t))
 max_U = np.max(np.abs(potential_energy_list_t))
-max_E = max_K + max_U
+max_E = int(max_K / 2)
 
 animation = FuncAnimation(fig, update, frames=number_of_timesteps, repeat=False, blit=True)
 
@@ -185,16 +186,16 @@ plt.tight_layout()
 plt.figure()
 plt.xlabel("x")
 plt.ylabel("y")
-chosen_time_slice_start = 1000
-chosen_timeslice_end = 1080
+chosen_time_slice_start = 2000
+chosen_timeslice_end = 2500
 position_figure = position_array[:, :, chosen_time_slice_start:chosen_timeslice_end]
 end_position_figure = position_figure[:, :, - 1]
 velocity_figure = velocity_array[:, :, chosen_timeslice_end]
 
 for i in range(N):
-    plt.plot(position_figure[i, 0, :], position_figure[i, 1, :], 'b', zorder=1)
-    plt.scatter(end_position_figure[i, 0], end_position_figure[i, 1], s=40, c='r', edgecolors="k", zorder=2)
+    plt.plot(position_figure[i, 0, :], position_figure[i, 1, :], 'k', zorder=1, linewidth=0.5)
+    plt.scatter(end_position_figure[i, 0], end_position_figure[i, 1], s=40, c='blue', edgecolors="k", zorder=2)
     plt.arrow(end_position_figure[i, 0], end_position_figure[i, 1], velocity_figure[i, 0], velocity_figure[i, 1],
-              width=0.005, head_width=24*0.05, head_length=12*0.05, zorder=3)
+              width=0.005, head_width=24*0.05, head_length=12*0.05, color='k', zorder=3)
 
 plt.show()
